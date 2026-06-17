@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kavishe Notepad Pro</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        theme: {
+                            blue: '#2196F3',
+                            green: '#4CAF50',
+                            black: '#212121',
+                            purple: '#9C27B0',
+                            red: '#F44336'
+                        }
+                    },
+                    borderRadius: {
+                        'xl': '12px',
+                        '2xl': '16px',
+                        '3xl': '24px'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts for Android feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Hide scrollbars but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Custom smooth transition */
+        .transition-all-custom {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Android ripple emulation on active */
+        .android-ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        .android-ripple:active::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            opacity: 1;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: ripple 0.4s ease-out;
+            pointer-events: none;
+        }
+        @keyframes ripple {
+            to {
+                transform: translate(-50%, -50%) scale(2.5);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-zinc-950 dark:text-gray-100 h-full overflow-hidden flex flex-col transition-all-custom">
+
+    <!-- APP WRAPPER -->
+    <div id="app-container" class="relative flex flex-col h-full w-full max-w-md mx-auto bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden border-x border-gray-100 dark:border-zinc-800">
+        
+        <!-- ================= MASTER PIN LOCK SCREEN ================= -->
+        <div id="master-lock-screen" class="absolute inset-0 z-50 bg-white dark:bg-zinc-900 flex flex-col items-center justify-between p-8 hidden">
+            <div class="flex-1 flex flex-col items-center justify-center w-full max-w-xs">
+                <div class="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-zinc-800 flex items-center justify-center mb-6">
+                    <i data-lucide="lock" class="w-8 h-8 text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <h2 class="text-xl font-bold tracking-tight mb-2">Kavishe Notepad Pro</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-8">Enter your Master PIN to unlock</p>
+                
+                <!-- Dots indicators -->
+                <div class="flex space-x-4 mb-8">
+                    <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-indigo-400 dark:border-indigo-600 bg-transparent transition-all duration-150"></div>
+                    <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-indigo-400 dark:border-indigo-600 bg-transparent transition-all duration-150"></div>
+                    <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-indigo-400 dark:border-indigo-600 bg-transparent transition-all duration-150"></div>
+                    <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-indigo-400 dark:border-indigo-600 bg-transparent transition-all duration-150"></div>
+                </div>
+
+                <div id="master-pin-error" class="text-xs text-red-500 font-semibold mb-4 h-4 opacity-0 transition-opacity">Incorrect PIN. Try again.</div>
+
+                <!-- Custom Android-style Keypad -->
+                <div class="grid grid-cols-3 gap-4 w-full">
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center font-bold text-lg" data-val="1">1</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center font-bold text-lg" data-val="2">2</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center font-bold text-lg" data-val="3">3</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center font-bold text-lg" data-val="4">4</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center font-bold text-lg" data-val="5">5</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center font-bold text-lg" data-val="6">6</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center font-bold text-lg" data-val="7">7</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center font-bold text-lg" data-val="8">8</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center font-bold text-lg" data-val="9">9</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center text-xs text-red-500 font-semibold" data-val="clear">CLR</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center font-bold text-lg" data-val="0">0</button>
+                    <button class="keypad-btn h-14 w-14 rounded-full bg-gray-50 dark:bg-zinc-800 active:scale-95 flex items-center justify-center text-gray-500" data-val="delete">
+                        <i data-lucide="delete" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SYSTEM BAR / CUSTOM HEADER ================= -->
+        <header id="app-header" class="px-4 pt-4 pb-2 flex items-center justify-between bg-white dark:bg-zinc-900 z-10">
+            <div class="flex items-center space-x-3">
+                <button id="hamburger-menu" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 android-ripple">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="flex flex-col">
+                    <h1 class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Kavishe Notepad</h1>
+                    <span id="header-subtitle" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-semibold tracking-wider">All Notes</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-1">
+                <button id="theme-accent-btn" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800" title="Quick Theme Switch">
+                    <div id="header-accent-dot" class="w-3.5 h-3.5 rounded-full bg-indigo-600 border border-white"></div>
+                </button>
+                <button id="toggle-search-btn" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+                <button id="dashboard-toggle-btn" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800" title="View Dashboard">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ================= LIVE FILTER & SEARCH PANEL ================= -->
+        <div id="search-bar-container" class="px-4 pb-3 transition-all duration-300 max-h-0 opacity-0 overflow-hidden bg-white dark:bg-zinc-900">
+            <div class="relative flex items-center">
+                <i data-lucide="search" class="absolute left-3 w-4 h-4 text-gray-400"></i>
+                <input type="text" id="global-search-input" placeholder="Search title, details, categories..." 
+                    class="w-full pl-9 pr-10 py-2 text-sm bg-gray-100 dark:bg-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 transition-all">
+                <button id="clear-search-btn" class="absolute right-3 p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hidden">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <!-- Quick Filter Chips -->
+            <div class="flex space-x-2 mt-2.5 overflow-x-auto no-scrollbar py-1">
+                <button class="filter-chip px-3 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400 shrink-0" data-filter="all">All</button>
+                <button class="filter-chip px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-gray-400 shrink-0" data-filter="favorites">★ Favorites</button>
+                <button class="filter-chip px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-gray-400 shrink-0" data-filter="locked">🔒 Locked</button>
+                <button class="filter-chip px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-gray-400 shrink-0" data-filter="recent">Recent</button>
+            </div>
+        </div>
+
+        <!-- ================= MAIN SCROLL CONTENT AREA ================= -->
+        <main class="flex-1 overflow-y-auto no-scrollbar bg-gray-50 dark:bg-zinc-950 px-4 py-3 relative">
+            
+            <!-- Sorting Selector -->
+            <div id="sort-controls" class="flex justify-between items-center mb-3">
+                <span id="notes-count-indicator" class="text-xs text-gray-500 dark:text-gray-400 font-medium">0 notes available</span>
+                <div class="flex items-center space-x-1.5 text-xs">
+                    <span class="text-gray-400 dark:text-gray-500">Sort by:</span>
+                    <select id="sort-select" class="bg-transparent font-semibold text-gray-700 dark:text-gray-300 border-none focus:ring-0 cursor-pointer text-xs">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="title">Alphabetical (A-Z)</option>
+                        <option value="favorites">Favorites Top</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Empty Notes Screen -->
+            <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center pointer-events-none opacity-0 transition-opacity duration-300">
+                <div class="w-20 h-20 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
+                    <i data-lucide="file-plus-2" class="w-10 h-10 text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 dark:text-white text-base">Your notepad is empty</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-[200px]">Tap the button below to start creating customized ideas, stories, and tasks.</p>
+            </div>
+
+            <!-- Notes List Grid/List -->
+            <div id="notes-list" class="grid grid-cols-1 gap-3 pb-24">
+                <!-- JavaScript renders cards here -->
+            </div>
+        </main>
+
+        <!-- ================= ANDROID STYLE FAB ================= -->
+        <button id="fab-create-note" class="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-indigo-600 text-white shadow-xl flex items-center justify-center active:scale-90 hover:bg-indigo-700 transition-all z-20 android-ripple">
+            <i data-lucide="plus" class="w-7 h-7"></i>
+        </button>
+
+        <!-- ================= SLIDE-OUT ANDROID SIDE DRAWER ================= -->
+        <div id="drawer-overlay" class="absolute inset-0 bg-black/50 z-30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+        <div id="drawer" class="absolute top-0 bottom-0 left-0 w-4/5 max-w-sm bg-white dark:bg-zinc-900 z-40 -translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
+            <!-- Drawer Header -->
+            <div class="p-6 bg-indigo-600 dark:bg-indigo-950 text-white flex flex-col justify-end h-40 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-indigo-500/30 rounded-full blur-xl pointer-events-none"></div>
+                
+                <h2 class="text-xl font-bold tracking-tight">Kavishe Notepad Pro</h2>
+                <p class="text-xs text-indigo-200 mt-0.5">Premium Offline Diary</p>
+                <div class="mt-4 flex items-center space-x-2 text-xs bg-indigo-500/20 py-1.5 px-3 rounded-lg w-max backdrop-blur-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                    <span>Offline Engine Ready</span>
+                </div>
+            </div>
+
+            <!-- Drawer Links -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-1">
+                <button class="drawer-link active w-full flex items-center space-x-3.5 px-3 py-2.5 rounded-xl text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800" data-view="all">
+                    <i data-lucide="files" class="w-5 h-5 text-indigo-500"></i>
+                    <span>All Notes</span>
+                </button>
+                <button class="drawer-link w-full flex items-center space-x-3.5 px-3 py-2.5 rounded-xl text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800" data-view="favorites">
+                    <i data-lucide="star" class="w-5 h-5 text-indigo-500"></i>
+                    <span>Favorites</span>
+                </button>
+                
+                <div class="border-t border-gray-100 dark:border-zinc-800 my-2"></div>
+                
+                <p class="px-3 py-1.5 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Categories</p>
+                <div id="drawer-categories" class="space-y-1">
+                    <!-- Loaded dynamically -->
+                </div>
+                <!-- Add Custom Category Btn -->
+                <button id="add-category-btn" class="w-full flex items-center space-x-3.5 px-3 py-2.5 rounded-xl text-left text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30">
+                    <i data-lucide="folder-plus" class="w-4 h-4"></i>
+                    <span>Create custom folder</span>
+                </button>
+
+                <div class="border-t border-gray-100 dark:border-zinc-800 my-2"></div>
+
+                <button class="drawer-link w-full flex items-center space-x-3.5 px-3 py-2.5 rounded-xl text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800" data-view="trash">
+                    <i data-lucide="trash-2" class="w-5 h-5 text-indigo-500"></i>
+                    <span>Trash Bin</span>
+                </button>
+                <button class="drawer-link w-full flex items-center space-x-3.5 px-3 py-2.5 rounded-xl text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800" data-view="settings">
+                    <i data-lucide="settings" class="w-5 h-5 text-indigo-500"></i>
+                    <span>Settings &amp; Pin</span>
+                </button>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="p-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 flex items-center justify-between text-xs text-gray-400">
+                <span>Version 3.2.0 (Pro)</span>
+                <span>Powered by DB</span>
+            </div>
+        </div>
+
+        <!-- ================= FULL NOTE EDITOR COMPONENT (SLIDES UP) ================= -->
+        <div id="note-editor-panel" class="absolute inset-0 bg-white dark:bg-zinc-900 z-30 translate-y-full transition-transform duration-300 flex flex-col">
+            <!-- Editor Header -->
+            <div class="px-4 py-3 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                <div class="flex items-center space-x-1">
+                    <button id="editor-back-btn" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800" title="Save and Exit">
+                        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                    </button>
+                    <span id="autosave-indicator" class="text-[10px] font-semibold text-gray-400 bg-gray-100 dark:bg-zinc-800 dark:text-gray-500 py-1 px-2 rounded-md uppercase tracking-wider">Draft</span>
+                </div>
+                
+                <div class="flex items-center space-x-1">
+                    <button id="editor-favorite-btn" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800" title="Favorite">
+                        <i data-lucide="star" class="w-5 h-5"></i>
+                    </button>
+                    <button id="editor-lock-btn" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800" title="Lock with PIN">
+                        <i data-lucide="unlock" class="w-5 h-5"></i>
+                    </button>
+                    <button id="editor-fullscreen-btn" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800" title="Full Screen Writing">
+                        <i data-lucide="maximize" class="w-5 h-5"></i>
+                    </button>
+                    <button id="editor-more-options" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800">
+                        <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- More Options Tooltip Menu -->
+            <div id="editor-dropdown-menu" class="absolute right-4 top-14 bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 rounded-xl shadow-xl z-50 p-2 hidden w-48 text-sm">
+                <button id="dropdown-duplicate-btn" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-700">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    <span>Duplicate Note</span>
+                </button>
+                <button id="dropdown-export-txt-btn" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-700">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Export as TXT</span>
+                </button>
+                <button id="dropdown-readonly-btn" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-700">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                    <span id="readonly-menu-text">Read-Only Mode</span>
+                </button>
+                <div class="border-t border-gray-100 dark:border-zinc-700 my-1"></div>
+                <button id="dropdown-delete-btn" class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <span>Move to Trash</span>
+                </button>
+            </div>
+
+            <!-- Editor Customizer (Category, Label Color, Icon Selection) -->
+            <div id="editor-tools-panel" class="px-4 py-2 bg-gray-50 dark:bg-zinc-900/50 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between overflow-x-auto no-scrollbar gap-3">
+                
+                <!-- Category Select -->
+                <div class="flex items-center shrink-0">
+                    <span class="text-xs text-gray-400 mr-1.5 font-semibold">Folder:</span>
+                    <select id="editor-category-select" class="bg-white dark:bg-zinc-800 text-xs font-semibold py-1 px-2.5 rounded-lg border border-gray-200 dark:border-zinc-700 focus:outline-none">
+                        <!-- Loaded dynamically -->
+                    </select>
+                </div>
+
+                <!-- Label Color Picker -->
+                <div class="flex items-center space-x-1 shrink-0">
+                    <span class="text-xs text-gray-400 mr-1.5 font-semibold">Label:</span>
+                    <div class="flex space-x-1">
+                        <button class="label-color-opt w-4 h-4 rounded-full border-2 border-transparent" style="background-color: #6366f1;" data-color="#6366f1"></button>
+                        <button class="label-color-opt w-4 h-4 rounded-full border-2 border-transparent" style="background-color: #22c55e;" data-color="#22c55e"></button>
+                        <button class="label-color-opt w-4 h-4 rounded-full border-2 border-transparent" style="background-color: #eab308;" data-color="#eab308"></button>
+                        <button class="label-color-opt w-4 h-4 rounded-full border-2 border-transparent" style="background-color: #ec4899;" data-color="#ec4899"></button>
+                        <button class="label-color-opt w-4 h-4 rounded-full border-2 border-transparent" style="background-color: #f43f5e;" data-color="#f43f5e"></button>
+                    </div>
+                </div>
+
+                <!-- Icon Picker -->
+                <div class="flex items-center shrink-0">
+                    <span class="text-xs text-gray-400 mr-1.5 font-semibold">Icon:</span>
+                    <select id="editor-icon-select" class="bg-white dark:bg-zinc-800 text-xs py-1 px-2 rounded-lg border border-gray-200 dark:border-zinc-700">
+                        <option value="sticky-note">📝 Note</option>
+                        <option value="book">📖 Book</option>
+                        <option value="lightbulb">💡 Idea</option>
+                        <option value="flame">🔥 Fire</option>
+                        <option value="pin">📌 Pin</option>
+                        <option value="heart">❤️ Heart</option>
+                        <option value="music">🎵 Music</option>
+                        <option value="briefcase">💼 Work</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Content Workspace -->
+            <div class="flex-1 flex flex-col p-5 overflow-y-auto no-scrollbar relative">
+                <!-- Lock Indicator Banner if locked -->
+                <div id="editor-lock-banner" class="mb-4 bg-indigo-50 dark:bg-zinc-800/80 px-3.5 py-2.5 rounded-xl flex items-center justify-between text-xs hidden">
+                    <span class="text-indigo-600 dark:text-indigo-400 flex items-center space-x-1.5 font-medium">
+                        <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                        <span>This note requires a secure custom password.</span>
+                    </span>
+                    <button id="editor-lock-remove" class="text-xs font-semibold text-red-500 hover:underline">Remove Lock</button>
+                </div>
+
+                <!-- Read Only mode banner -->
+                <div id="editor-readonly-banner" class="mb-4 bg-amber-50 dark:bg-amber-950/30 px-3.5 py-2 rounded-xl flex items-center text-xs text-amber-700 dark:text-amber-400 font-semibold hidden">
+                    <i data-lucide="eye" class="w-3.5 h-3.5 mr-2"></i>
+                    <span>Read-Only mode is enabled. Cannot edit details.</span>
+                </div>
+
+                <!-- Input Elements -->
+                <input type="text" id="editor-note-title" placeholder="Untitled Note" 
+                    class="w-full text-xl font-bold bg-transparent border-none focus:ring-0 focus:outline-none mb-3 text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-zinc-600">
+                
+                <textarea id="editor-note-content" placeholder="Start writing something beautiful..." 
+                    class="w-full flex-1 bg-transparent border-none focus:ring-0 focus:outline-none resize-none text-sm text-gray-800 dark:text-zinc-200 placeholder-gray-400 leading-relaxed"></textarea>
+            </div>
+
+            <!-- Status Indicator Panel -->
+            <div class="px-4 py-2.5 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 flex justify-between items-center text-xs text-gray-400">
+                <div class="flex space-x-3.5">
+                    <span>Words: <strong id="word-count" class="font-semibold text-gray-600 dark:text-gray-300">0</strong></span>
+                    <span>Chars: <strong id="char-count" class="font-semibold text-gray-600 dark:text-gray-300">0</strong></span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <i data-lucide="clock" class="w-3 h-3"></i>
+                    <span id="editor-time-indicator">Unsaved</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PANEL 3: DASHBOARD STATS VIEW (SLIDES UP) ================= -->
+        <div id="dashboard-panel" class="absolute inset-0 bg-white dark:bg-zinc-900 z-30 translate-y-full transition-transform duration-300 flex flex-col">
+            <div class="px-4 py-4 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                <h3 class="font-bold text-lg">Analytics Dashboard</h3>
+                <button id="dashboard-close-btn" class="p-2 rounded-full bg-gray-100 dark:bg-zinc-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- Metrics -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-4 bg-indigo-50 dark:bg-indigo-950/40 rounded-2xl">
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-indigo-500">Total Created</span>
+                        <h4 id="stat-total" class="text-3xl font-extrabold text-indigo-700 dark:text-indigo-400 mt-1">0</h4>
+                    </div>
+                    <div class="p-4 bg-yellow-50 dark:bg-yellow-950/40 rounded-2xl">
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-yellow-600">Star Favorites</span>
+                        <h4 id="stat-favs" class="text-3xl font-extrabold text-yellow-600 dark:text-yellow-400 mt-1">0</h4>
+                    </div>
+                    <div class="p-4 bg-green-50 dark:bg-green-950/40 rounded-2xl">
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-green-600 font-semibold">Active Categories</span>
+                        <h4 id="stat-folders" class="text-3xl font-extrabold text-green-600 dark:text-green-400 mt-1">0</h4>
+                    </div>
+                    <div class="p-4 bg-rose-50 dark:bg-rose-950/40 rounded-2xl">
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-rose-600">Trash Bin</span>
+                        <h4 id="stat-trash" class="text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">0</h4>
+                    </div>
+                </div>
+
+                <!-- Category Breakdown list -->
+                <div class="p-4 border border-gray-100 dark:border-zinc-800 rounded-2xl">
+                    <h4 class="font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Folders Breakdown</h4>
+                    <div id="stats-cat-list" class="space-y-2">
+                        <!-- Loaded via JS -->
+                    </div>
+                </div>
+
+                <!-- Last Modified History -->
+                <div class="p-4 border border-gray-100 dark:border-zinc-800 rounded-2xl">
+                    <h4 class="font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Recently Modified File</h4>
+                    <div id="stats-recently-edited" class="flex items-start space-x-3 bg-gray-50 dark:bg-zinc-800/40 p-3 rounded-xl">
+                        <div class="p-2.5 rounded-xl bg-indigo-100 dark:bg-zinc-700">
+                            <i data-lucide="file-text" class="w-5 h-5 text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <p id="recent-stat-title" class="text-xs font-bold text-gray-800 dark:text-white">None</p>
+                            <p id="recent-stat-time" class="text-[10px] text-gray-400 mt-0.5">No edits made yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PANEL 4: SETTINGS PAGE PANEL (SLIDES UP) ================= -->
+        <div id="settings-panel" class="absolute inset-0 bg-white dark:bg-zinc-900 z-30 translate-y-full transition-transform duration-300 flex flex-col">
+            <div class="px-4 py-4 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                <h3 class="font-bold text-lg">System Settings</h3>
+                <button id="settings-close-btn" class="p-2 rounded-full bg-gray-100 dark:bg-zinc-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                
+                <!-- Theme Accent Customizer -->
+                <div class="p-4 border border-gray-100 dark:border-zinc-800 rounded-2xl">
+                    <h4 class="font-bold text-xs uppercase tracking-widest text-gray-400 mb-3">Branding Theme</h4>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button class="accent-picker-btn h-11 rounded-xl bg-theme-blue border-2 border-transparent active:scale-95 flex items-center justify-center text-white" data-accent="blue">
+                            <span class="text-[10px] font-bold">Blue</span>
+                        </button>
+                        <button class="accent-picker-btn h-11 rounded-xl bg-theme-green border-2 border-transparent active:scale-95 flex items-center justify-center text-white" data-accent="green">
+                            <span class="text-[10px] font-bold">Green</span>
+                        </button>
+                        <button class="accent-picker-btn h-11 rounded-xl bg-theme-black border-2 border-transparent active:scale-95 flex items-center justify-center text-white" data-accent="black">
+                            <span class="text-[10px] font-bold">Black</span>
+                        </button>
+                        <button class="accent-picker-btn h-11 rounded-xl bg-theme-purple border-2 border-transparent active:scale-95 flex items-center justify-center text-white" data-accent="purple">
+                            <span class="text-[10px] font-bold">Purple</span>
+                        </button>
+                        <button class="accent-picker-btn h-11 rounded-xl bg-theme-red border-2 border-transparent active:scale-95 flex items-center justify-center text-white" data-accent="red">
+                            <span class="text-[10px] font-bold">Red</span>
+                        </button>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Dark Interface Mode</span>
+                        <button id="dark-mode-toggle" class="w-12 h-6 bg-gray-200 dark:bg-indigo-600 rounded-full relative p-0.5 transition-all">
+                            <div class="w-5 h-5 bg-white dark:bg-zinc-900 rounded-full shadow-md transform translate-x-0 dark:translate-x-6 transition-all flex items-center justify-center">
+                                <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-500 hidden dark:block"></i>
+                                <i data-lucide="sun" class="w-3.5 h-3.5 text-yellow-500 block dark:hidden"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Master Security lock config -->
+                <div class="p-4 border border-gray-100 dark:border-zinc-800 rounded-2xl">
+                    <h4 class="font-bold text-xs uppercase tracking-widest text-gray-400 mb-2">Security System</h4>
+                    <p class="text-[10px] text-gray-400 mb-3">Enforce a 4-digit security Master PIN on start-up.</p>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Enable Master PIN</span>
+                            <button id="pin-enable-toggle" class="w-12 h-6 bg-gray-200 rounded-full relative p-0.5 transition-all">
+                                <div id="pin-toggle-handle" class="w-5 h-5 bg-white rounded-full shadow-md transform translate-x-0 transition-all"></div>
+                            </button>
+                        </div>
+                        <div id="pin-setup-section" class="hidden space-y-2 pt-2 border-t border-gray-100 dark:border-zinc-800">
+                            <label class="block text-[10px] font-bold text-gray-400">ENTER NEW 4-DIGIT PIN</label>
+                            <input type="password" id="pin-setup-input" maxlength="4" placeholder="••••" class="w-full text-center tracking-widest py-1.5 bg-gray-100 dark:bg-zinc-800 rounded-lg text-sm focus:outline-none">
+                            <button id="save-pin-btn" class="w-full py-1.5 text-xs font-semibold bg-indigo-600 text-white rounded-lg active:scale-95 transition-all">Save Pin Code</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backups & Cloud Sync Operations -->
+                <div class="p-4 border border-gray-100 dark:border-zinc-800 rounded-2xl space-y-3">
+                    <h4 class="font-bold text-xs uppercase tracking-widest text-gray-400">Local Backups &amp; Restore</h4>
+                    <p class="text-[10px] text-gray-400">All data remains inside your browser sandbox database.</p>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="backup-export-all-btn" class="p-2.5 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 rounded-xl active:scale-95 flex flex-col items-center text-center justify-center space-y-1">
+                            <i data-lucide="download" class="w-5 h-5"></i>
+                            <span class="text-xs font-bold">Export Backup</span>
+                        </button>
+                        
+                        <label class="p-2.5 bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400 rounded-xl active:scale-95 flex flex-col items-center text-center justify-center space-y-1 cursor-pointer">
+                            <i data-lucide="upload" class="w-5 h-5"></i>
+                            <span class="text-xs font-bold">Import Backup</span>
+                            <input type="file" id="backup-import-file-input" accept=".json" class="hidden">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="p-4 border border-rose-100 dark:border-rose-950/40 rounded-2xl bg-rose-50/20 dark:bg-rose-950/10 space-y-3">
+                    <h4 class="font-bold text-xs uppercase tracking-widest text-rose-500">System Maintenance</h4>
+                    <p class="text-[10px] text-gray-400">Perform complete system formatting. This cannot be undone.</p>
+                    <button id="factory-reset-btn" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold text-xs rounded-xl transition-all">
+                        Reset Application Database
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SYSTEM LEVEL CUSTOM CONFIRMATION/INPUT DIALOG ================= -->
+        <div id="custom-dialog-overlay" class="absolute inset-0 bg-black/60 z-50 flex items-center justify-center p-6 opacity-0 pointer-events-none transition-opacity duration-200">
+            <div id="custom-dialog" class="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4 scale-90 transition-transform duration-200">
+                <div class="flex items-center space-x-3">
+                    <div id="dialog-icon-container" class="p-2.5 bg-red-50 text-red-600 rounded-2xl">
+                        <i data-lucide="alert-triangle" id="dialog-icon" class="w-5 h-5"></i>
+                    </div>
+                    <h4 id="dialog-title" class="font-extrabold text-base">Confirm Action</h4>
+                </div>
+                <p id="dialog-desc" class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Are you absolutely sure you want to perform this action?</p>
+                <input type="text" id="dialog-input" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 hidden" placeholder="Enter input value">
+                <div class="flex space-x-2.5">
+                    <button id="dialog-cancel-btn" class="flex-1 py-2 rounded-xl text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-zinc-300">Cancel</button>
+                    <button id="dialog-confirm-btn" class="flex-1 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= IN-APP TOAST NOTIFICATION CONTAINER ================= -->
+        <div id="toast-notif" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-gray-900/90 dark:bg-zinc-800/95 backdrop-blur text-white py-2 px-4 rounded-xl text-xs font-semibold shadow-xl flex items-center space-x-2 transition-all duration-300 opacity-0 pointer-events-none scale-90 z-50">
+            <span id="toast-icon-wrapper" class="flex items-center justify-center"></span>
+            <span id="toast-message">Database initialized successfully!</span>
+        </div>
+
+    </div>
+
+    <!-- MAIN JAVASCRIPT CODE - COMPLETE PRODUCTION ENGINE -->
+    <script>
+        // ================= CONFIGURATION & CONSTANTS =================
+        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'kavishe-notepad-pro';
+        const DB_NAME = `db_${APP_ID}`;
+        const DB_VERSION = 1;
+
+        // Dynamic Global State Variables
+        let db = null;
+        let activeNote = null;
+        let originalLockPass = null;
+        let activeCategoryView = 'all'; // 'all', 'favorites', 'trash', custom category id
+        let settings = {
+            accentColor: 'blue',
+            darkMode: false,
+            pinEnabled: false,
+            masterPin: ""
+        };
+
+        // Dialog State Management variables for promises
+        let dialogResolve = null;
+
+        // Custom accent config colors corresponding with Tailwind colors
+        const accentColors = {
+            blue: '#2196F3',
+            green: '#4CAF50',
+            black: '#212121',
+            purple: '#9C27B0',
+            red: '#F44336'
+        };
+
+        // System Categories defaults
+        const DEFAULT_CATEGORIES = [
+            { id: 'stories', name: 'Stories', count: 0 },
+            { id: 'songs', name: 'Songs', count: 0 },
+            { id: 'ideas', name: 'Ideas', count: 0 },
+            { id: 'work', name: 'Work', count: 0 },
+            { id: 'personal', name: 'Personal', count: 0 }
+        ];
+
+        // ================= INDEXED DB UTILITY MODULE =================
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onupgradeneeded = function(e) {
+                    const database = e.target.result;
+                    
+                    // Create Notes Store
+                    if (!database.objectStoreNames.contains('notes')) {
+                        const noteStore = database.createObjectStore('notes', { keyPath: 'id' });
+                        noteStore.createIndex('category', 'category', { unique: false });
+                        noteStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+                    }
+
+                    // Create Settings Store
+                    if (!database.objectStoreNames.contains('settings')) {
+                        database.createObjectStore('settings', { keyPath: 'key' });
+                    }
+
+                    // Create Categories Store
+                    if (!database.objectStoreNames.contains('categories')) {
+                        database.createObjectStore('categories', { keyPath: 'id' });
+                    }
+                };
+
+                request.onsuccess = function(e) {
+                    db = e.target.result;
+                    resolve(db);
+                };
+
+                request.onerror = function(e) {
+                    reject(e.target.error);
+                };
+            });
+        }
+
+        // DB Data Operations Wrapper
+        const DBService = {
+            // Notes Operations
+            saveNote(note) {
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('notes', 'readwrite');
+                    const store = tx.objectStore('notes');
+                    const req = store.put(note);
+                    req.onsuccess = () => resolve(note);
+                    req.onerror = () => reject(req.error);
+                });
+            },
+
+            getNote(id) {
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('notes', 'readonly');
+                    const store = tx.objectStore('notes');
+                    const req = store.get(id);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            },
+
+            getAllNotes() {
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('notes', 'readonly');
+                    const store = tx.objectStore('notes');
+                    const req = store.getAll();
+                    req.onsuccess = () => resolve(req.result || []);
+                    req.onerror = () => reject(req.error);
+                });
+            },
+
+            deleteNote(id) {
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction('notes', 'readwrite');
+                    const store = tx.objectStore('notes');
+                    const req = store.delete(id);
+                    req.onsuccess = () => resolve(true);
+                    req.onerror = () => reject(req.error);
+                });
+            },
+
+            // Settings store
+            getSettings() {
+                return new Promise((resolve) => {
+                    const tx = db.transaction('settings', 'readonly');
+                    const store = tx.objectStore('settings');
+                    const req = store.get('app_config');
+                    req.onsuccess = () => resolve(req.result ? req.result.value : null);
+                    req.onerror = () => resolve(null);
+                });
+            },
+
+            saveSettings(config) {
+                return new Promise((resolve) => {
+                    const tx = db.transaction('settings', 'readwrite');
+                    const store = tx.objectStore('settings');
+                    const req = store.put({ key: 'app_config', value: config });
+                    req.onsuccess = () => resolve(true);
+                    req.onerror = () => resolve(false);
+                });
+            },
+
+            // Category Store
+            getAllCategories() {
+                return new Promise((resolve) => {
+                    const tx = db.transaction('categories', 'readonly');
+                    const store = tx.objectStore('categories');
+                    const req = store.getAll();
+                    req.onsuccess = () => {
+                        if (req.result && req.result.length > 0) {
+                            resolve(req.result);
+                        } else {
+                            // Seed default categories
+                            this.seedDefaultCategories().then(() => {
+                                resolve(DEFAULT_CATEGORIES);
+                            });
+                        }
+                    };
+                    req.onerror = () => resolve(DEFAULT_CATEGORIES);
+                });
+            },
+
+            seedDefaultCategories() {
+                return new Promise((resolve) => {
+                    const tx = db.transaction('categories', 'readwrite');
+                    const store = tx.objectStore('categories');
+                    DEFAULT_CATEGORIES.forEach(cat => store.put(cat));
+                    tx.oncomplete = () => resolve(true);
+                });
+            },
+
+            addCategory(cat) {
+                return new Promise((resolve) => {
+                    const tx = db.transaction('categories', 'readwrite');
+                    const store = tx.objectStore('categories');
+                    store.put(cat);
+                    tx.oncomplete = () => resolve(true);
+                });
+            },
+
+            clearAllData() {
+                return new Promise((resolve) => {
+                    const tx = db.transaction(['notes', 'settings', 'categories'], 'readwrite');
+                    tx.objectStore('notes').clear();
+                    tx.objectStore('settings').clear();
+                    tx.objectStore('categories').clear();
+                    tx.oncomplete = () => resolve(true);
+                });
+            }
+        };
+
+        // ================= APPLICATION CORE CONTROLLER =================
+        const App = {
+            async init() {
+                try {
+                    await initDB();
+                    await this.loadSettings();
+                    await this.loadCategories();
+                    this.registerEventListeners();
+                    
+                    // Boot up layout
+                    this.applySettingsTheme();
+                    this.renderCategoriesList();
+                    this.renderAllNotes();
+                    this.updateStatsDashboard();
+                    
+                    // Check if Master Pin Lock Screen is needed
+                    if (settings.pinEnabled && settings.masterPin) {
+                        this.showMasterPinLock();
+                    }
+
+                    this.showToast('Secure database connected & loaded');
+                    lucide.createIcons();
+                } catch(error) {
+                    console.error("Initial database system failure: ", error);
+                }
+            },
+
+            // Load saved settings from DB
+            async loadSettings() {
+                const stored = await DBService.getSettings();
+                if (stored) {
+                    settings = { ...settings, ...stored };
+                }
+            },
+
+            // Load or seed categories
+            async loadCategories() {
+                this.categories = await DBService.getAllCategories();
+            },
+
+            // Apply loaded Theme Configuration
+            applySettingsTheme() {
+                // Dark mode toggle
+                const htmlClass = document.documentElement.classList;
+                if (settings.darkMode) {
+                    htmlClass.add('dark');
+                    document.getElementById('dark-mode-toggle').classList.add('bg-indigo-600');
+                } else {
+                    htmlClass.remove('dark');
+                    document.getElementById('dark-mode-toggle').classList.remove('bg-indigo-600');
+                }
+
+                // Accent classes styling
+                const primaryColorHex = accentColors[settings.accentColor] || accentColors.blue;
+                document.getElementById('header-accent-dot').style.backgroundColor = primaryColorHex;
+                document.getElementById('fab-create-note').style.backgroundColor = primaryColorHex;
+                
+                // Colorize key UI accents and badges dynamically
+                document.querySelectorAll('.theme-text-accent').forEach(el => {
+                    el.style.color = primaryColorHex;
+                });
+            },
+
+            // Register all App Click & Interaction Listeners
+            registerEventListeners() {
+                // Hamburger Menu Control
+                const drawer = document.getElementById('drawer');
+                const overlay = document.getElementById('drawer-overlay');
+                
+                const openDrawer = () => {
+                    drawer.classList.remove('-translate-x-full');
+                    overlay.classList.remove('opacity-0', 'pointer-events-none');
+                };
+
+                const closeDrawer = () => {
+                    drawer.classList.add('-translate-x-full');
+                    overlay.classList.add('opacity-0', 'pointer-events-none');
+                };
+
+                document.getElementById('hamburger-menu').addEventListener('click', openDrawer);
+                overlay.addEventListener('click', closeDrawer);
+
+                // Quick Mode & Filter Buttons
+                document.getElementById('toggle-search-btn').addEventListener('click', () => {
+                    const container = document.getElementById('search-bar-container');
+                    if (container.classList.contains('max-h-0')) {
+                        container.classList.remove('max-h-0', 'opacity-0');
+                        container.classList.add('max-h-24', 'opacity-100');
+                        document.getElementById('global-search-input').focus();
+                    } else {
+                        container.classList.add('max-h-0', 'opacity-0');
+                        container.classList.remove('max-h-24', 'opacity-100');
+                        document.getElementById('global-search-input').value = "";
+                        this.renderAllNotes();
+                    }
+                });
+
+                // Clear Quick Search Input
+                const searchInp = document.getElementById('global-search-input');
+                const clearSearchBtn = document.getElementById('clear-search-btn');
+                searchInp.addEventListener('input', (e) => {
+                    if (e.target.value.length > 0) {
+                        clearSearchBtn.classList.remove('hidden');
+                    } else {
+                        clearSearchBtn.classList.add('hidden');
+                    }
+                    this.renderAllNotes();
+                });
+
+                clearSearchBtn.addEventListener('click', () => {
+                    searchInp.value = "";
+                    clearSearchBtn.classList.add('hidden');
+                    this.renderAllNotes();
+                });
+
+                // FAB Create Event
+                document.getElementById('fab-create-note').addEventListener('click', () => {
+                    this.createNewNoteWorkflow();
+                });
+
+                // Editor Options dropdown click controls
+                document.getElementById('editor-more-options').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const menu = document.getElementById('editor-dropdown-menu');
+                    menu.classList.toggle('hidden');
+                });
+
+                // Close editor dropdown on body clicks
+                document.addEventListener('click', () => {
+                    document.getElementById('editor-dropdown-menu').classList.add('hidden');
+                });
+
+                // Back Button Editor View
+                document.getElementById('editor-back-btn').addEventListener('click', () => {
+                    this.closeEditorPanel();
+                });
+
+                // Favorite Toggle inside active editor workspace
+                document.getElementById('editor-favorite-btn').addEventListener('click', () => {
+                    if (!activeNote) return;
+                    activeNote.isFavorite = !activeNote.isFavorite;
+                    const el = document.getElementById('editor-favorite-btn');
+                    if (activeNote.isFavorite) {
+                        el.classList.add('text-yellow-500');
+                    } else {
+                        el.classList.remove('text-yellow-500');
+                    }
+                    this.saveActiveNote();
+                });
+
+                // Lock note configuration click inside Active Workspace
+                document.getElementById('editor-lock-btn').addEventListener('click', async () => {
+                    if (!activeNote) return;
+                    if (activeNote.isLocked) {
+                        this.showToast('This note is locked');
+                    } else {
+                        const pass = await this.promptDialog('Set Lock Password', 'Choose secure password for this folder/note:', '', true);
+                        if (pass && pass.trim().length > 0) {
+                            activeNote.isLocked = true;
+                            activeNote.password = pass.trim();
+                            this.saveActiveNote();
+                            this.showToast('Note locked successfully');
+                        }
+                    }
+                });
+
+                // Remove Active lock click action on banner
+                document.getElementById('editor-lock-remove').addEventListener('click', async () => {
+                    if (!activeNote) return;
+                    const passConfirm = await this.promptDialog('Verify password', 'Enter current lock password to unlock:', '', true);
+                    if (passConfirm === activeNote.password) {
+                        activeNote.isLocked = false;
+                        activeNote.password = '';
+                        this.saveActiveNote();
+                        this.showToast('Security lock has been detached');
+                    } else if (passConfirm !== null) {
+                        this.showToast('Wrong note security password', true);
+                    }
+                });
+
+                // Fullscreen writing layout trigger
+                document.getElementById('editor-fullscreen-btn').addEventListener('click', () => {
+                    const el = document.getElementById('note-editor-panel');
+                    const btn = document.getElementById('editor-fullscreen-btn');
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                        btn.innerHTML = `<i data-lucide="maximize" class="w-5 h-5"></i>`;
+                    } else {
+                        el.requestFullscreen().catch(() => {});
+                        btn.innerHTML = `<i data-lucide="minimize" class="w-5 h-5"></i>`;
+                    }
+                    lucide.createIcons();
+                });
+
+                // Word counter logic & Auto save action listeners
+                const contentTextarea = document.getElementById('editor-note-content');
+                const titleInput = document.getElementById('editor-note-title');
+                
+                let autosaveDebounce;
+                const onContentChange = () => {
+                    this.calculateCounts();
+                    
+                    // Autosave logic (debounce 700ms)
+                    clearTimeout(autosaveDebounce);
+                    document.getElementById('autosave-indicator').innerText = 'Saving...';
+                    autosaveDebounce = setTimeout(() => {
+                        this.saveActiveNote();
+                    }, 700);
+                };
+
+                contentTextarea.addEventListener('input', onContentChange);
+                titleInput.addEventListener('input', onContentChange);
+
+                // Drawer Links view swapping handler
+                document.querySelectorAll('.drawer-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        document.querySelectorAll('.drawer-link').forEach(el => el.classList.remove('active', 'bg-indigo-50', 'dark:bg-indigo-950/40'));
+                        link.classList.add('active', 'bg-indigo-50', 'dark:bg-indigo-950/40');
+                        
+                        const view = link.getAttribute('data-view');
+                        activeCategoryView = view;
+                        
+                        // Set dynamic headers
+                        const titleTag = document.getElementById('header-subtitle');
+                        if (view === 'all') titleTag.innerText = 'All Notes';
+                        else if (view === 'favorites') titleTag.innerText = 'Favorites';
+                        else if (view === 'trash') titleTag.innerText = 'Trash Bin';
+                        else if (view === 'settings') titleTag.innerText = 'Settings';
+                        
+                        // Handle panel sliding visibility
+                        if (view === 'settings') {
+                            this.slideUpPanel('settings-panel');
+                        } else {
+                            this.renderAllNotes();
+                        }
+                        
+                        closeDrawer();
+                    });
+                });
+
+                // Dialog Controls
+                document.getElementById('dialog-cancel-btn').addEventListener('click', () => {
+                    this.hideDialog(null);
+                });
+
+                document.getElementById('dialog-confirm-btn').addEventListener('click', () => {
+                    const val = document.getElementById('dialog-input').value;
+                    this.hideDialog(val || true);
+                });
+
+                // Settings Dark Mode button toggle action
+                document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+                    settings.darkMode = !settings.darkMode;
+                    this.applySettingsTheme();
+                    this.saveAppConfiguration();
+                });
+
+                // Settings Pin lock system switch toggle action
+                document.getElementById('pin-enable-toggle').addEventListener('click', () => {
+                    const targetSection = document.getElementById('pin-setup-section');
+                    const handle = document.getElementById('pin-toggle-handle');
+                    
+                    if (settings.pinEnabled) {
+                        settings.pinEnabled = false;
+                        settings.masterPin = "";
+                        document.getElementById('pin-enable-toggle').classList.remove('bg-indigo-600');
+                        handle.style.transform = 'translateX(0px)';
+                        targetSection.classList.add('hidden');
+                        this.saveAppConfiguration();
+                        this.showToast('Master lock system deactivated');
+                    } else {
+                        document.getElementById('pin-enable-toggle').classList.add('bg-indigo-600');
+                        handle.style.transform = 'translateX(24px)';
+                        targetSection.classList.remove('hidden');
+                    }
+                });
+
+                // Master PIN security confirmation configuration
+                document.getElementById('save-pin-btn').addEventListener('click', () => {
+                    const pinVal = document.getElementById('pin-setup-input').value;
+                    if (pinVal && pinVal.length === 4 && /^\d+$/.test(pinVal)) {
+                        settings.pinEnabled = true;
+                        settings.masterPin = pinVal;
+                        this.saveAppConfiguration();
+                        this.showToast('Master PIN is successfully stored!');
+                        document.getElementById('pin-setup-section').classList.add('hidden');
+                        document.getElementById('pin-setup-input').value = "";
+                    } else {
+                        this.showToast('PIN must be exactly 4 digits long', true);
+                    }
+                });
+
+                // Accent branding colors configuration UI buttons
+                document.querySelectorAll('.accent-picker-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const col = btn.getAttribute('data-accent');
+                        settings.accentColor = col;
+                        this.applySettingsTheme();
+                        this.saveAppConfiguration();
+                        this.showToast(`Active accent: ${col.toUpperCase()}`);
+                    });
+                });
+
+                // Quick Accent Dot Click Action
+                document.getElementById('theme-accent-btn').addEventListener('click', () => {
+                    const colorsList = ['blue', 'green', 'black', 'purple', 'red'];
+                    let nextIdx = (colorsList.indexOf(settings.accentColor) + 1) % colorsList.length;
+                    settings.accentColor = colorsList[nextIdx];
+                    this.applySettingsTheme();
+                    this.saveAppConfiguration();
+                    this.showToast(`Accent set to ${settings.accentColor}`);
+                });
+
+                // Settings Close Navigation
+                document.getElementById('settings-close-btn').addEventListener('click', () => {
+                    this.slideDownPanel('settings-panel');
+                    // Reset Active Navigation View back to home
+                    document.querySelector('.drawer-link[data-view="all"]').click();
+                });
+
+                // Create custom folder/category click
+                document.getElementById('add-category-btn').addEventListener('click', async () => {
+                    closeDrawer();
+                    const title = await this.promptDialog('New Category', 'Specify name for your custom category folder:', '', false);
+                    if (title && title.trim().length > 0) {
+                        const cleanId = title.trim().toLowerCase().replace(/\s+/g, '-');
+                        const newCat = { id: cleanId, name: title.trim(), count: 0 };
+                        
+                        // Prevent duplicates
+                        if (this.categories.some(c => c.id === cleanId)) {
+                            this.showToast('Category name already exists', true);
+                            return;
+                        }
+
+                        this.categories.push(newCat);
+                        await DBService.addCategory(newCat);
+                        this.renderCategoriesList();
+                        this.updateStatsDashboard();
+                        this.showToast(`Created category ${title.trim()}`);
+                    }
+                });
+
+                // More Editor Actions dropdown action workflows
+                document.getElementById('dropdown-duplicate-btn').addEventListener('click', () => {
+                    this.duplicateActiveNote();
+                });
+
+                document.getElementById('dropdown-readonly-btn').addEventListener('click', () => {
+                    this.toggleReadonlyMode();
+                });
+
+                document.getElementById('dropdown-export-txt-btn').addEventListener('click', () => {
+                    this.exportActiveNoteAsTXT();
+                });
+
+                document.getElementById('dropdown-delete-btn').addEventListener('click', () => {
+                    this.moveActiveNoteToTrash();
+                });
+
+                // Backup System triggers
+                document.getElementById('backup-export-all-btn').addEventListener('click', () => {
+                    this.exportEntireDatabaseBackup();
+                });
+
+                document.getElementById('backup-import-file-input').addEventListener('change', (e) => {
+                    this.importDatabaseBackupWorkflow(e);
+                });
+
+                // Format/Reset application trigger
+                document.getElementById('factory-reset-btn').addEventListener('click', async () => {
+                    const confirm = await this.confirmDialog('Hard Reset Application', 'This process deletes all notes, folders, custom locks, and configurations instantly. Proceed?');
+                    if (confirm) {
+                        await DBService.clearAllData();
+                        this.showToast('Factory reset complete');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                });
+
+                // Dashboard Toggle Click Handles
+                document.getElementById('dashboard-toggle-btn').addEventListener('click', () => {
+                    this.updateStatsDashboard();
+                    this.slideUpPanel('dashboard-panel');
+                });
+
+                document.getElementById('dashboard-close-btn').addEventListener('click', () => {
+                    this.slideDownPanel('dashboard-panel');
+                });
+
+                // Sorting Trigger Handler
+                document.getElementById('sort-select').addEventListener('change', () => {
+                    this.renderAllNotes();
+                });
+
+                // Quick filter chip clicks
+                document.querySelectorAll('.filter-chip').forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('bg-indigo-50', 'text-indigo-600', 'dark:bg-indigo-950', 'dark:text-indigo-400'));
+                        document.querySelectorAll('.filter-chip').forEach(c => c.classList.add('bg-gray-100', 'text-gray-600', 'dark:bg-zinc-800', 'dark:text-gray-400'));
+                        
+                        chip.classList.remove('bg-gray-100', 'text-gray-600', 'dark:bg-zinc-800', 'dark:text-gray-400');
+                        chip.classList.add('bg-indigo-50', 'text-indigo-600', 'dark:bg-indigo-950', 'dark:text-indigo-400');
+
+                        const filter = chip.getAttribute('data-filter');
+                        activeCategoryView = filter;
+                        this.renderAllNotes();
+                    });
+                });
+            },
+
+            // Save settings module
+            async saveAppConfiguration() {
+                await DBService.saveSettings(settings);
+            },
+
+            // Slide layout utilities
+            slideUpPanel(panelId) {
+                const el = document.getElementById(panelId);
+                el.classList.remove('translate-y-full');
+            },
+
+            // Slide layout utilities
+            slideDownPanel(panelId) {
+                const el = document.getElementById(panelId);
+                el.classList.add('translate-y-full');
+            },
+
+            // Render Dynamic Folder List in drawer
+            renderCategoriesList() {
+                const container = document.getElementById('drawer-categories');
+                container.innerHTML = "";
+
+                this.categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'drawer-link w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all';
+                    btn.setAttribute('data-view', cat.id);
+                    btn.innerHTML = `
+                        <div class="flex items-center space-x-3.5">
+                            <i data-lucide="folder" class="w-4 h-4 text-indigo-400"></i>
+                            <span>${cat.name}</span>
+                        </div>
+                    `;
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.drawer-link').forEach(el => el.classList.remove('active', 'bg-indigo-50', 'dark:bg-indigo-950/40'));
+                        btn.classList.add('active', 'bg-indigo-50', 'dark:bg-indigo-950/40');
+                        
+                        activeCategoryView = cat.id;
+                        document.getElementById('header-subtitle').innerText = `Folder: ${cat.name}`;
+                        this.renderAllNotes();
+                        document.getElementById('drawer-overlay').click(); // close drawer
+                    });
+                    container.appendChild(btn);
+                });
+                lucide.createIcons();
+            },
+
+            // Render active list of non-deleted note records
+            async renderAllNotes() {
+                const notesList = document.getElementById('notes-list');
+                const emptyState = document.getElementById('empty-state');
+                const searchQuery = document.getElementById('global-search-input').value.toLowerCase();
+                const sortingMethod = document.getElementById('sort-select').value;
+                
+                notesList.innerHTML = "";
+
+                let notes = await DBService.getAllNotes();
+
+                // 1. FILTER SYSTEM
+                if (activeCategoryView === 'favorites') {
+                    notes = notes.filter(n => n.isFavorite && !n.isDeleted);
+                } else if (activeCategoryView === 'trash') {
+                    notes = notes.filter(n => n.isDeleted);
+                } else if (activeCategoryView === 'locked') {
+                    notes = notes.filter(n => n.isLocked && !n.isDeleted);
+                } else if (activeCategoryView === 'recent') {
+                    // Filter notes updated within last 24 hours
+                    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+                    notes = notes.filter(n => n.updatedAt >= oneDayAgo && !n.isDeleted);
+                } else if (activeCategoryView !== 'all') {
+                    // Custom folders category
+                    notes = notes.filter(n => n.category === activeCategoryView && !n.isDeleted);
+                } else {
+                    // "All" view shows all active notes
+                    notes = notes.filter(n => !n.isDeleted);
+                }
+
+                // Apply text search dynamic filters
+                if (searchQuery.trim().length > 0) {
+                    notes = notes.filter(n => {
+                        return n.title.toLowerCase().includes(searchQuery) || 
+                               n.content.toLowerCase().includes(searchQuery) ||
+                               n.category.toLowerCase().includes(searchQuery);
+                    });
+                }
+
+                // 2. SORT SYSTEM
+                if (sortingMethod === 'newest') {
+                    notes.sort((a,b) => b.updatedAt - a.updatedAt);
+                } else if (sortingMethod === 'oldest') {
+                    notes.sort((a,b) => a.updatedAt - b.updatedAt);
+                } else if (sortingMethod === 'title') {
+                    notes.sort((a,b) => a.title.localeCompare(b.title));
+                } else if (sortingMethod === 'favorites') {
+                    notes.sort((a,b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0));
+                }
+
+                // Display empty panel states
+                if (notes.length === 0) {
+                    emptyState.classList.add('opacity-100');
+                    emptyState.classList.remove('pointer-events-none');
+                } else {
+                    emptyState.classList.remove('opacity-100');
+                    emptyState.classList.add('pointer-events-none');
+                }
+
+                document.getElementById('notes-count-indicator').innerText = `${notes.length} note(s) found`;
+
+                // Render dynamic notes elements
+                notes.forEach(note => {
+                    const card = document.createElement('div');
+                    card.className = "p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-sm relative active:scale-[0.98] transition-all cursor-pointer overflow-hidden";
+                    card.style.borderLeft = `4px solid ${note.labelColor || '#6366f1'}`;
+
+                    const dateString = new Date(note.updatedAt).toLocaleDateString(undefined, { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+
+                    // Build inside layout
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-1.5">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-gray-400 dark:text-zinc-500">
+                                    <i data-lucide="${note.icon || 'sticky-note'}" class="w-4 h-4"></i>
+                                </span>
+                                <h4 class="font-extrabold text-sm text-gray-800 dark:text-zinc-100 truncate max-w-[180px]">
+                                    ${note.isLocked ? '🔒 Locked Document' : (note.title || 'Untitled Note')}
+                                </h4>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                ${note.isFavorite ? '<i data-lucide="star" class="w-3.5 h-3.5 fill-yellow-400 text-yellow-400"></i>' : ''}
+                                ${note.isLocked ? '<i data-lucide="lock" class="w-3.5 h-3.5 text-indigo-500"></i>' : ''}
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 dark:text-zinc-400 line-clamp-2 leading-relaxed mb-3 pr-2">
+                            ${note.isLocked ? 'This entry is highly encrypted and password protected.' : (note.content || 'No details content entered yet...')}
+                        </p>
+                        <div class="flex justify-between items-center text-[10px] text-gray-400 dark:text-zinc-500 font-semibold">
+                            <span class="bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">${note.category}</span>
+                            <span>${dateString}</span>
+                        </div>
+                    `;
+
+                    // Card operations
+                    card.addEventListener('click', () => {
+                        this.openNoteWorkflow(note);
+                    });
+
+                    notesList.appendChild(card);
+                });
+
+                lucide.createIcons();
+            },
+
+            // Create Note workflow
+            async createNewNoteWorkflow() {
+                const newNote = {
+                    id: 'note_' + Date.now(),
+                    title: '',
+                    content: '',
+                    category: 'personal',
+                    isFavorite: false,
+                    isLocked: false,
+                    password: '',
+                    labelColor: '#6366f1',
+                    icon: 'sticky-note',
+                    isDeleted: false,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                    readOnly: false
+                };
+
+                await DBService.saveNote(newNote);
+                this.openNoteWorkflow(newNote);
+                this.renderAllNotes();
+            },
+
+            // Open note checking password protections
+            async openNoteWorkflow(note) {
+                if (note.isLocked) {
+                    const pinConfirm = await this.promptDialog('Verify Note Lock', 'Enter note access password:', '', true);
+                    if (pinConfirm !== note.password) {
+                        if (pinConfirm !== null) {
+                            this.showToast('Invalid note security password', true);
+                        }
+                        return;
+                    }
+                }
+
+                // Assign details
+                activeNote = note;
+                originalLockPass = note.password;
+
+                // Load content inside workspace view
+                document.getElementById('editor-note-title').value = note.title;
+                document.getElementById('editor-note-content').value = note.content;
+                
+                // Color Label indicators selection
+                document.querySelectorAll('.label-color-opt').forEach(btn => {
+                    const col = btn.getAttribute('data-color');
+                    if (col === note.labelColor) {
+                        btn.classList.add('border-indigo-600', 'scale-110');
+                    } else {
+                        btn.classList.remove('border-indigo-600', 'scale-110');
+                    }
+                });
+
+                // Set Favorite Indicator
+                const favBtn = document.getElementById('editor-favorite-btn');
+                if (note.isFavorite) {
+                    favBtn.classList.add('text-yellow-500');
+                } else {
+                    favBtn.classList.remove('text-yellow-500');
+                }
+
+                // Render dynamic Category configurations
+                const catSel = document.getElementById('editor-category-select');
+                catSel.innerHTML = "";
+                this.categories.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat.id;
+                    opt.innerText = cat.name;
+                    if (cat.id === note.category) opt.selected = true;
+                    catSel.appendChild(opt);
+                });
+
+                // Render Icon picker values
+                document.getElementById('editor-icon-select').value = note.icon || 'sticky-note';
+
+                // Setup Lock Banner
+                const lockBanner = document.getElementById('editor-lock-banner');
+                if (note.isLocked) {
+                    lockBanner.classList.remove('hidden');
+                } else {
+                    lockBanner.classList.add('hidden');
+                }
+
+                // ReadOnly layouts settings
+                this.applyReadonlyLayoutState();
+
+                // Setup Save timing dynamic updates
+                const parsedTime = new Date(note.updatedAt).toLocaleTimeString(undefined, {
+                    hour: '2-digit', minute: '2-digit'
+                });
+                document.getElementById('editor-time-indicator').innerText = `Saved ${parsedTime}`;
+                document.getElementById('autosave-indicator').innerText = 'Synced';
+
+                this.calculateCounts();
+
+                // Event bindings for custom labels and options inside workspace
+                const onLabelClick = (btn) => {
+                    const col = btn.getAttribute('data-color');
+                    activeNote.labelColor = col;
+                    document.querySelectorAll('.label-color-opt').forEach(b => b.classList.remove('border-indigo-600', 'scale-110'));
+                    btn.classList.add('border-indigo-600', 'scale-110');
+                    this.saveActiveNote();
+                };
+
+                document.querySelectorAll('.label-color-opt').forEach(btn => {
+                    btn.onclick = () => onLabelClick(btn);
+                });
+
+                document.getElementById('editor-category-select').onchange = (e) => {
+                    activeNote.category = e.target.value;
+                    this.saveActiveNote();
+                };
+
+                document.getElementById('editor-icon-select').onchange = (e) => {
+                    activeNote.icon = e.target.value;
+                    this.saveActiveNote();
+                };
+
+                this.slideUpPanel('note-editor-panel');
+            },
+
+            // Core AutoSave Trigger module
+            async saveActiveNote() {
+                if (!activeNote || activeNote.readOnly) return;
+
+                const rawTitle = document.getElementById('editor-note-title').value;
+                const rawContent = document.getElementById('editor-note-content').value;
+
+                activeNote.title = rawTitle.trim();
+                activeNote.content = rawContent;
+                activeNote.updatedAt = Date.now();
+
+                await DBService.saveNote(activeNote);
+                
+                const timeStr = new Date(activeNote.updatedAt).toLocaleTimeString(undefined, {
+                    hour: '2-digit', minute: '2-digit'
+                });
+                document.getElementById('editor-time-indicator').innerText = `Saved ${timeStr}`;
+                document.getElementById('autosave-indicator').innerText = 'Saved';
+            },
+
+            // Duplicate Note Utility
+            async duplicateActiveNote() {
+                if (!activeNote) return;
+                await this.saveActiveNote();
+
+                const dupNote = {
+                    ...activeNote,
+                    id: 'note_' + Date.now(),
+                    title: activeNote.title ? `${activeNote.title} (Copy)` : 'Untitled Note Copy',
+                    createdAt: Date.now(),
+                    updatedAt: Date.now()
+                };
+
+                await DBService.saveNote(dupNote);
+                this.showToast('Note duplicated');
+                this.closeEditorPanel();
+            },
+
+            // ReadOnly Mode toggle functions
+            toggleReadonlyMode() {
+                if (!activeNote) return;
+                activeNote.readOnly = !activeNote.readOnly;
+                this.applyReadonlyLayoutState();
+                this.saveActiveNote();
+                
+                const status = activeNote.readOnly ? 'Locked View Mode' : 'Editing View Mode';
+                this.showToast(status);
+            },
+
+            applyReadonlyLayoutState() {
+                const titleInp = document.getElementById('editor-note-title');
+                const textInp = document.getElementById('editor-note-content');
+                const banner = document.getElementById('editor-readonly-banner');
+                const menuText = document.getElementById('readonly-menu-text');
+
+                if (activeNote.readOnly) {
+                    titleInp.disabled = true;
+                    textInp.disabled = true;
+                    banner.classList.remove('hidden');
+                    menuText.innerText = "Unlock Editing Mode";
+                } else {
+                    titleInp.disabled = false;
+                    textInp.disabled = false;
+                    banner.classList.add('hidden');
+                    menuText.innerText = "Read-Only Mode";
+                }
+            },
+
+            // Move current loaded document into Local Trash Storage
+            async moveActiveNoteToTrash() {
+                if (!activeNote) return;
+                
+                const inTrashAlready = activeNote.isDeleted;
+                const confirm = await this.confirmDialog(
+                    inTrashAlready ? 'Delete Permanently' : 'Move to Trash Bin',
+                    inTrashAlready ? 'Are you sure you want to permanently delete this file?' : 'You can restore this note anytime from the Trash Bin sidebar menu.'
+                );
+
+                if (confirm) {
+                    if (inTrashAlready) {
+                        await DBService.deleteNote(activeNote.id);
+                        this.showToast('Note deleted permanently');
+                    } else {
+                        activeNote.isDeleted = true;
+                        activeNote.updatedAt = Date.now();
+                        await DBService.saveNote(activeNote);
+                        this.showToast('Note moved to Trash');
+                    }
+                    this.closeEditorPanel();
+                }
+            },
+
+            // Close workspace editor panel smoothly
+            closeEditorPanel() {
+                this.saveActiveNote().then(() => {
+                    this.slideDownPanel('note-editor-panel');
+                    activeNote = null;
+                    this.renderAllNotes();
+                });
+            },
+
+            // Calculation statistics
+            calculateCounts() {
+                const text = document.getElementById('editor-note-content').value;
+                const clean = text.trim();
+                const wordCount = clean === "" ? 0 : clean.split(/\s+/).length;
+                const charCount = text.length;
+
+                document.getElementById('word-count').innerText = wordCount;
+                document.getElementById('char-count').innerText = charCount;
+            },
+
+            // Single note export to raw TXT download handler
+            exportActiveNoteAsTXT() {
+                if (!activeNote) return;
+                const title = activeNote.title || 'Untitled Note';
+                const content = `=== ${title} ===\nFolder: ${activeNote.category}\nDate: ${new Date(activeNote.createdAt).toLocaleString()}\n\n${activeNote.content}`;
+                
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${title.toLowerCase().replace(/\s+/g, '-')}.txt`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+                this.showToast('Note exported as TXT');
+            },
+
+            // Entire application database export Backup module (JSON structured backup)
+            async exportEntireDatabaseBackup() {
+                const notes = await DBService.getAllNotes();
+                const categories = this.categories;
+                
+                const backupPayload = {
+                    appSignature: 'KavisheNotepadPro_Backup',
+                    version: '3.2.0',
+                    timestamp: Date.now(),
+                    notes: notes,
+                    categories: categories,
+                    settings: settings
+                };
+
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload));
+                const link = document.createElement('a');
+                link.setAttribute("href",     dataStr);
+                link.setAttribute("download", `kavishe-notepad-backup-${new Date().toISOString().slice(0,10)}.json`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                this.showToast('Backup exported successfully');
+            },
+
+            // Backup Import process validation and merge engine
+            importDatabaseBackupWorkflow(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const payload = JSON.parse(e.target.result);
+                        if (payload.appSignature !== 'KavisheNotepadPro_Backup') {
+                            this.showToast('Invalid backup file structure', true);
+                            return;
+                        }
+
+                        const confirm = await this.confirmDialog('Import Backup', `Found ${payload.notes?.length || 0} notes and ${payload.categories?.length || 0} folders. Merge backup data into current database?`);
+                        if (confirm) {
+                            // Merge Notes inside IndexedDB
+                            if (payload.notes) {
+                                for (const note of payload.notes) {
+                                    await DBService.saveNote(note);
+                                }
+                            }
+                            
+                            // Merge Categories/Folders
+                            if (payload.categories) {
+                                for (const cat of payload.categories) {
+                                    await DBService.addCategory(cat);
+                                }
+                            }
+
+                            this.showToast('Backup successfully imported & synced!');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                    } catch (err) {
+                        this.showToast('Parsing backup failed', true);
+                    }
+                };
+                reader.readAsText(file);
+            },
+
+            // System statistics update module
+            async updateStatsDashboard() {
+                const notes = await DBService.getAllNotes();
+                const totalActive = notes.filter(n => !n.isDeleted).length;
+                const totalFavorites = notes.filter(n => n.isFavorite && !n.isDeleted).length;
+                const totalTrash = notes.filter(n => n.isDeleted).length;
+
+                document.getElementById('stat-total').innerText = totalActive;
+                document.getElementById('stat-favs').innerText = totalFavorites;
+                document.getElementById('stat-folders').innerText = this.categories.length;
+                document.getElementById('stat-trash').innerText = totalTrash;
+
+                // Categories listing inside metrics breakdown view
+                const catBreakdown = document.getElementById('stats-cat-list');
+                catBreakdown.innerHTML = "";
+                
+                this.categories.forEach(cat => {
+                    const cnt = notes.filter(n => n.category === cat.id && !n.isDeleted).length;
+                    const row = document.createElement('div');
+                    row.className = "flex justify-between items-center text-xs py-1.5 border-b border-gray-50 dark:border-zinc-800/40";
+                    row.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                            <span class="font-semibold text-gray-700 dark:text-zinc-300">${cat.name}</span>
+                        </div>
+                        <span class="text-gray-400 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full font-bold">${cnt} file(s)</span>
+                    `;
+                    catBreakdown.appendChild(row);
+                });
+
+                // Find recently modified single active file
+                const sortedActive = notes.filter(n => !n.isDeleted).sort((a,b) => b.updatedAt - a.updatedAt);
+                if (sortedActive.length > 0) {
+                    const top = sortedActive[0];
+                    document.getElementById('recent-stat-title').innerText = top.title || 'Untitled Note';
+                    document.getElementById('recent-stat-time').innerText = `Edited ${new Date(top.updatedAt).toLocaleString()}`;
+                } else {
+                    document.getElementById('recent-stat-title').innerText = "No edits made yet";
+                    document.getElementById('recent-stat-time').innerText = "Empty database context";
+                }
+            },
+
+            // MASTER PIN Lock Panel management
+            showMasterPinLock() {
+                const screen = document.getElementById('master-lock-screen');
+                screen.classList.remove('hidden');
+
+                let enteredPin = "";
+                const dots = document.querySelectorAll('.pin-dot');
+                const errText = document.getElementById('master-pin-error');
+
+                const updateDots = () => {
+                    dots.forEach((dot, idx) => {
+                        if (idx < enteredPin.length) {
+                            dot.classList.remove('bg-transparent');
+                            dot.classList.add('bg-indigo-600', 'dark:bg-indigo-400');
+                        } else {
+                            dot.classList.add('bg-transparent');
+                            dot.classList.remove('bg-indigo-600', 'dark:bg-indigo-400');
+                        }
+                    });
+                };
+
+                // Clear input arrays
+                enteredPin = "";
+                updateDots();
+
+                // Bind click event handlers
+                document.querySelectorAll('.keypad-btn').forEach(btn => {
+                    // Clone to strip any previous listeners
+                    const cleanBtn = btn.cloneNode(true);
+                    btn.parentNode.replaceChild(cleanBtn, btn);
+
+                    cleanBtn.addEventListener('click', () => {
+                        const val = cleanBtn.getAttribute('data-val');
+                        
+                        if (val === 'clear') {
+                            enteredPin = "";
+                            errText.classList.add('opacity-0');
+                        } else if (val === 'delete') {
+                            enteredPin = enteredPin.slice(0, -1);
+                            errText.classList.add('opacity-0');
+                        } else {
+                            if (enteredPin.length < 4) {
+                                enteredPin += val;
+                            }
+                        }
+
+                        updateDots();
+
+                        // Pin confirmation
+                        if (enteredPin.length === 4) {
+                            setTimeout(() => {
+                                if (enteredPin === settings.masterPin) {
+                                    screen.classList.add('hidden');
+                                    this.showToast('Unlocking secure database successful');
+                                } else {
+                                    enteredPin = "";
+                                    updateDots();
+                                    errText.classList.remove('opacity-0');
+                                    // Soft mobile shake animation emulation
+                                    screen.classList.add('animate-shake');
+                                    setTimeout(() => screen.classList.remove('animate-shake'), 400);
+                                }
+                            }, 200);
+                        }
+                    });
+                });
+            },
+
+            // Custom asynchronous confirmation dialog helper logic (eliminates alerts)
+            confirmDialog(title, description) {
+                return new Promise((resolve) => {
+                    const overlay = document.getElementById('custom-dialog-overlay');
+                    const dialog = document.getElementById('custom-dialog');
+                    
+                    document.getElementById('dialog-title').innerText = title;
+                    document.getElementById('dialog-desc').innerText = description;
+                    document.getElementById('dialog-input').classList.add('hidden');
+                    
+                    // Show dialog
+                    overlay.classList.remove('opacity-0', 'pointer-events-none');
+                    dialog.classList.remove('scale-90');
+
+                    dialogResolve = resolve;
+                });
+            },
+
+            // Dialog asking input text fields
+            promptDialog(title, description, defaultValue = '', isSecure = false) {
+                return new Promise((resolve) => {
+                    const overlay = document.getElementById('custom-dialog-overlay');
+                    const dialog = document.getElementById('custom-dialog');
+                    const input = document.getElementById('dialog-input');
+                    
+                    document.getElementById('dialog-title').innerText = title;
+                    document.getElementById('dialog-desc').innerText = description;
+                    
+                    input.value = defaultValue;
+                    input.type = isSecure ? 'password' : 'text';
+                    input.classList.remove('hidden');
+                    
+                    overlay.classList.remove('opacity-0', 'pointer-events-none');
+                    dialog.classList.remove('scale-90');
+                    input.focus();
+
+                    dialogResolve = resolve;
+                });
+            },
+
+            // Hide Confirmation Dialog UI
+            hideDialog(val) {
+                const overlay = document.getElementById('custom-dialog-overlay');
+                const dialog = document.getElementById('custom-dialog');
+                
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                dialog.classList.add('scale-90');
+                
+                if (dialogResolve) {
+                    dialogResolve(val);
+                    dialogResolve = null;
+                }
+            },
+
+            // Customized UI Toast notification builder
+            showToast(message, isError = false) {
+                const toast = document.getElementById('toast-notif');
+                const toastText = document.getElementById('toast-message');
+                const iconWrapper = document.getElementById('toast-icon-wrapper');
+
+                if (!toast || !toastText || !iconWrapper) return;
+
+                toastText.innerText = message;
+                if (isError) {
+                    toast.classList.add('bg-rose-950', 'text-rose-100');
+                    iconWrapper.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>`;
+                } else {
+                    toast.classList.remove('bg-rose-950', 'text-rose-100');
+                    iconWrapper.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>`;
+                }
+
+                lucide.createIcons();
+                toast.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
+
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
+                }, 2200);
+            }
+        };
+
+        // Initialize Core Engine on Window Load
+        window.onload = function() {
+            App.init();
+
+            // Self-register offline-first Service Worker safely
+            if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+                try {
+                    const swCode = `
+                        const CACHE_NAME = 'kavishe-notepad-v1';
+                        const ASSETS = [
+                            '/',
+                            '/index.html',
+                            'https://cdn.tailwindcss.com',
+                            'https://unpkg.com/lucide@latest',
+                            'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap'
+                        ];
+
+                        self.addEventListener('install', e => {
+                            e.waitUntil(
+                                caches.open(CACHE_NAME).then(cache => {
+                                    return cache.addAll(ASSETS);
+                                }).then(() => self.skipWaiting())
+                            );
+                        });
+
+                        self.addEventListener('activate', e => {
+                            e.waitUntil(
+                                caches.keys().then(keys => {
+                                    return Promise.all(
+                                        keys.map(key => {
+                                            if (key !== CACHE_NAME) {
+                                                return caches.delete(key);
+                                            }
+                                        })
+                                    );
+                                }).then(() => self.clients.claim())
+                            );
+                        });
+
+                        self.addEventListener('fetch', e => {
+                            e.respondWith(
+                                caches.match(e.request).then(cached => {
+                                    return cached || fetch(e.request).catch(() => {
+                                        if (e.request.mode === 'navigate') {
+                                            return caches.match('/index.html');
+                                        }
+                                    });
+                                })
+                            );
+                        });
+                    `;
+
+                    const blob = new Blob([swCode], { type: 'application/javascript' });
+                    const swUrl = URL.createObjectURL(blob);
+                    navigator.serviceWorker.register(swUrl)
+                        .then(() => console.log('PWA Service Worker registered successfully.'))
+                        .catch(err => console.warn('Service Worker registration skipped/unsupported in sandbox scope.', err));
+                } catch (err) {
+                    console.warn('Offline PWA Service Worker is inactive in this hosting context.', err);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
